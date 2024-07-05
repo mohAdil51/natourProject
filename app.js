@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const morgan = require('morgan');
 
 const tourRouter = require('./routes/tourRoute');
 const globalError = require('./controllers/errorController');
@@ -12,8 +13,10 @@ dotenv.config({ path: 'config.env' });
 app.use(express.json());
 
 // middleware
+app.use(morgan('dev'));
+
 app.use((req, res, next) => {
-  console.log('hellow from the middleware 🙌');
+  console.log('hello from the middleware 🙌');
 
   next();
 });
