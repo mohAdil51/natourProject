@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const app = require('./app');
 
+// uncaught rejection
+process.on('uncaughtRejection', (err) => {
+  console.log('uncaught rejection! ❌ shuting down...');
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
 const DB = process.env.DB_URL;
 mongoose
   .connect(DB)
@@ -15,9 +22,9 @@ const server = app.listen(port, () => {
 });
 
 // unhandled rejection
-process.on('unhandled rejection', (err) => {
-  console.log(err.name, err.message);
+process.on('unhandledRejection', (err) => {
   console.log('unhandled rejection! ❌ shuting down...');
+  console.log(err.name, err.message);
   server.close(() => {
     process.exit(1);
   });

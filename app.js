@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 
 const tourRouter = require('./routes/tourRoute');
+const userRouter = require('./routes/userRoute');
 const globalError = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 
@@ -23,6 +24,7 @@ app.use((req, res, next) => {
 
 // routes
 app.use('/api/v3/tours', tourRouter);
+app.use('/api/v3/users', userRouter);
 
 // error handler
 app.all('*', (req, res, next) => {
