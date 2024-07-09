@@ -29,10 +29,11 @@ const userSchema = new mongoose.Schema({
   photo: String,
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
     default: 'user',
   },
   active: Boolean,
+  passwordChangedAt: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -53,6 +54,16 @@ userSchema.methods.correctPassword = async function (
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.cheachTimeStamp = function (JWTTimeStamp) {
+  if (this.passwordChangedAt) {
+    const changedDate = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+
+    return changedDate > JWTTimeStamp; // true
+  }
+
+  return false;
 };
 
 const User = mongoose.model('User_3', userSchema);

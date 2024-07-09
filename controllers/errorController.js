@@ -1,6 +1,12 @@
 const AppError = require('./../utils/appError');
 
 // Production (client-oriented) error handlers
+const TokenExpiredErrorHandler = (err) =>
+  new AppError('Token has expired, please log in again', 401);
+
+const invalidTokenHandler = (err) =>
+  new AppError('Invalid token, Please log in again', 401);
+
 const validationErrorHandler = (err) => {
   const values = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data: ${values.join('. ')}`;
@@ -64,6 +70,8 @@ module.exports = (err, req, res, next) => {
     if (err.name === 'CastError') err = castErrorHandler(err);
     if (err.code === 11000) err = duplicateErrorHandler(err);
     if (err.name === 'ValidationError') err = validationErrorHandler(err);
+    if (err.name === 'JsonWebTokenError') err = invalidTokenHandler(err);
+    if (err.name === 'TokenExpiredError') err = TokenExpiredErrorHandler(err);
 
     prodError(err, res);
   }
