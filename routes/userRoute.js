@@ -10,30 +10,21 @@ router.route('/login').post(authController.login);
 router.route('/forgotPassword').post(authController.forgotPassword);
 router.route('/resetPassword/:token').patch(authController.resetPassword);
 
-router
-  .route('/updatemypassword')
-  .patch(authController.protect, authController.updatePassword);
+// protect all routes after this middleware
+router.use(authController.protect);
 
-router
-  .route('/updateMe')
-  .patch(authController.protect, userController.updateMe);
+router.route('/me').get(userController.getMe, userController.getUserById);
+router.route('/updatemypassword').patch(authController.updatePassword);
+router.route('/updateMe').patch(userController.updateMe);
+router.route('/deleteMe').delete(userController.deleteMe);
 
-router
-  .route('/deleteMe')
-  .delete(authController.protect, userController.deleteMe);
+// only admins are allowed to perform actions after this middleware
+router.use(authController.strictTo('admin'));
 
 router
   .route('/')
-  .get(
-    authController.protect,
-    authController.strictTo('admin'),
-    userController.getAllUsers
-  )
-  .post(
-    userController.createUser,
-    authController.protect,
-    authController.strictTo('admin')
-  );
+  .get(userController.getAllUsers)
+  .post(userController.createUser);
 
 router
   .route('/:id')
