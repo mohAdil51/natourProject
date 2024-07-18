@@ -62,7 +62,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(
       new AppError(
         'The email or the password is not correct, please try again!',
-        400
+        401
       )
     );
 
@@ -78,8 +78,9 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
-
   if (!token)
     return next(
       new AppError('You are not logged in, log in to get access', 401)
@@ -109,6 +110,29 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // access granted
   req.user = freshUser;
+  next();
+});
+
+// only for rendered pages, there is no error
+exports.isLogedIn = catchAsync(async (req, res, next) => {
+  // 1- get the token and see if its there
+  if (req.cookies.jwt) {
+    // 2- token verivation
+    const decoded = await util.promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.SECRETKEY
+    );
+
+    // 3- cheack id user still exist
+    const freshUser = await User.findById(decoded.id);
+    if (!freshUser) return next();
+
+    // 4- cheak if user changed password after the jwt was issued
+    if (freshUser.cheachTimeStamp(decoded.iat)) return next();
+
+    // access granted
+    res.locals.user = freshUser;
+  }
   next();
 });
 

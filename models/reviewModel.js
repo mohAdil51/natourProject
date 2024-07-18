@@ -15,20 +15,32 @@ const reviewSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
-  user: [
-    {
-      type: mongoose.Schema.ObjectId,
-      ref: 'User_3',
-      required: [true, 'The review must belong to a user!'],
-    },
-  ],
-  tour: [
-    {
-      type: mongoose.Schema.ObjectId,
-      ref: 'Tour_3',
-      required: [true, 'The review must belong to a tour!'],
-    },
-  ],
+  // user: {
+  //   type: mongoose.Schema.ObjectId,
+  //   ref: 'User_3',
+  //   required: [true, 'The review must belong to a user!'],
+  // },
+
+  // tour: [
+  //   {
+  //     type: mongoose.Schema.ObjectId,
+  //     ref: 'Tour_3',
+  //     required: [true, 'The review must belong to a tour!'],
+  //   },
+  // ],
+  // parent referencing
+  tour: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Tour_3',
+    required: [true, 'review must belong to a tour.'],
+  },
+
+  // parent referencing
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User_3',
+    required: [true, 'review must belong to a user.'],
+  },
 });
 
 // each compination of tour and user always have to be unique
