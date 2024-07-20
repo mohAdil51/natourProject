@@ -70,6 +70,17 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+exports.logOut = (req, res) => {
+  res.cookie('jwt', '', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    status: 'success',
+  });
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   // 1- get the token and see if its there
   let token;
@@ -110,31 +121,37 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // access granted
   req.user = freshUser;
+  res.locals.user = freshUser;
   next();
 });
 
 // only for rendered pages, there is no error
-exports.isLogedIn = catchAsync(async (req, res, next) => {
+exports.isLogedIn = async (req, res, next) => {
   // 1- get the token and see if its there
   if (req.cookies.jwt) {
-    // 2- token verivation
-    const decoded = await util.promisify(jwt.verify)(
-      req.cookies.jwt,
-      process.env.SECRETKEY
-    );
+    try {
+      // 2- token verivation
+      const decoded = await util.promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.SECRETKEY
+      );
 
-    // 3- cheack id user still exist
-    const freshUser = await User.findById(decoded.id);
-    if (!freshUser) return next();
+      // 3- cheack id user still exist
+      const freshUser = await User.findById(decoded.id);
+      if (!freshUser) return next();
 
-    // 4- cheak if user changed password after the jwt was issued
-    if (freshUser.cheachTimeStamp(decoded.iat)) return next();
+      // 4- cheak if user changed password after the jwt was issued
+      if (freshUser.cheachTimeStamp(decoded.iat)) return next();
 
-    // access granted
-    res.locals.user = freshUser;
+      // access granted
+      res.locals.user = freshUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
   }
   next();
-});
+};
 
 exports.strictTo = (...role) => {
   return (req, res, next) => {

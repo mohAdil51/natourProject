@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "description": "learn backEnd",
   "main": "index.js",
+  "targets": {
+    "main": false
+  },
   "scripts": {
     "start": "nodemon index.js",
-    "start:prod": "ENVIRONMENT=production nodemon index.js"
+    "start:prod": "ENVIRONMENT=production nodemon index.js",
+    "build:js": "parcel build ./public/js/index.js --dist-dir ./public/js/bundled",
+    "watch:js": "parcel watch ./public/js/index.js --dist-dir ./public/js/bundled"
   },
   "author": "moh",
   "license": "ISC",
@@ -29,7 +34,8 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
     "nodemon": "^3.1.4",
-    "parcel-bundler": "^1.12.5"
+    "parcel": "^2.12.0"
   }
 }

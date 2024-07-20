@@ -26,35 +26,62 @@ const duplicateErrorHandler = (err) => {
 };
 
 // production errors
-const prodError = (err, res) => {
-  // 1- if operational error
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-    });
-  }
-  // 2- if not operational error
-  else {
+const prodError = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    // A) API
+    // 1- if operational error
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
+
+    // 2- if not operational error
     // log the error
     console.log(err);
 
     // send generic message
-    res.status(404).json({
+    return res.status(404).json({
       status: 'fail',
       message: 'Something went very wrong',
     });
   }
+  // B) RENDERED WEBSITE
+  // 1- if operational error
+  if (err.isOperational) {
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: err.message,
+    });
+  }
+
+  // 2- if not operational error
+  // log the error
+  console.log(err);
+
+  // send generic message
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    msg: 'Please try again later!',
+  });
 };
 
 // development errors
-const devError = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-    stack: err.stack,
-    err,
-  });
+const devError = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+      stack: err.stack,
+      err,
+    });
+  } else {
+    res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: err.message,
+    });
+  }
 };
 
 module.exports = (err, req, res, next) => {
@@ -62,7 +89,7 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'Error';
 
   if (process.env.ENVIROMENT === 'development') {
-    devError(err, res);
+    devError(err, req, res);
   } else if (process.env.ENVIROMENT === 'production') {
     // let error = { ...err };
     // let error = Object.assign({}, err);
@@ -73,6 +100,6 @@ module.exports = (err, req, res, next) => {
     if (err.name === 'JsonWebTokenError') err = invalidTokenHandler(err);
     if (err.name === 'TokenExpiredError') err = TokenExpiredErrorHandler(err);
 
-    prodError(err, res);
+    prodError(err, req, res);
   }
 };

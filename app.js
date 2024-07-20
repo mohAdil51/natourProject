@@ -27,19 +27,77 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Set security HTTP headers
-app.use(helmet());
+// app.use(helmet());
 
-// Further HELMET configuration for Security Policy (CSP)
-const scriptSrcUrls = ['https://unpkg.com/', 'https://tile.openstreetmap.org'];
+// // Further HELMET configuration for Security Policy (CSP)
+// const scriptSrcUrls = ['https://unpkg.com/', 'https://tile.openstreetmap.org'];
+// const styleSrcUrls = [
+//   'https://unpkg.com/',
+//   'https://tile.openstreetmap.org',
+//   'https://fonts.googleapis.com/',
+// ];
+// const connectSrcUrls = ['https://unpkg.com', 'https://tile.openstreetmap.org'];
+// const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
+
+// // set security http headers
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       defaultSrc: [],
+//       connectSrc: ["'self'", ...connectSrcUrls],
+//       scriptSrc: ["'self'", ...scriptSrcUrls],
+//       styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+//       workerSrc: ["'self'", 'blob:'],
+//       objectSrc: [],
+//       imgSrc: ["'self'", 'blob:', 'data:', 'https:'],
+//       fontSrc: ["'self'", ...fontSrcUrls],
+//       defaultSrc: ["'self'"],
+//       scriptSrc: ["'self'", 'unpkg.com'],
+//       styleSrc: ["'self'", 'cdnjs.cloudflare.com'],
+//       // fontSrc: ["'self'", "maxcdn.bootstrapcdn.com"],
+//       defaultSrc: ["'self'", 'data:', 'blob:', 'https:', 'ws:'],
+//       baseUri: ["'self'"],
+//       fontSrc: ["'self'", ...fontSrcUrls],
+//       scriptSrc: ["'self'", 'https:', 'http:', 'blob:', ...scriptSrcUrls],
+//       frameSrc: ["'self'", 'https://js.stripe.com'],
+//       objectSrc: ["'none'"],
+//       styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+//       workerSrc: ["'self'", 'blob:', 'https://m.stripe.network'],
+//       childSrc: ["'self'", 'blob:'],
+//       imgSrc: ["'self'", 'blob:', 'data:', 'https:'],
+//       formAction: ["'self'"],
+//       connectSrc: [
+//         "'self'",
+//         "'unsafe-inline'",
+//         'data:',
+//         'blob:',
+//         ...connectSrcUrls,
+//       ],
+//       upgradeInsecureRequests: [],
+//     },
+//   })
+// );
+
+// set security HTTP headers
+// Further HELMET configuration for Security Policy (CSP) to unblock axios HTTP and leaflet map
+const scriptSrcUrls = [
+  'https://unpkg.com/',
+  'https://tile.openstreetmap.org',
+  'https://*.stripe.com',
+];
 const styleSrcUrls = [
   'https://unpkg.com/',
   'https://tile.openstreetmap.org',
   'https://fonts.googleapis.com/',
 ];
-const connectSrcUrls = ['https://unpkg.com', 'https://tile.openstreetmap.org'];
+const connectSrcUrls = [
+  'https://unpkg.com',
+  'https://tile.openstreetmap.org',
+  'ws://localhost:1234/',
+  'https://*.stripe.com',
+];
 const fontSrcUrls = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
-// set security http headers
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -47,14 +105,11 @@ app.use(
       connectSrc: ["'self'", ...connectSrcUrls],
       scriptSrc: ["'self'", ...scriptSrcUrls],
       styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
-      workerSrc: ["'self'", 'blob:'],
+      workerSrc: ["'self'", 'blob:', 'https://*.stripe.com'],
       objectSrc: [],
-      imgSrc: ["'self'", 'blob:', 'data:', 'https:'],
+      imgSrc: ["'self'", 'blob:', 'data:', 'https:', 'https://*.stripe.com'],
       fontSrc: ["'self'", ...fontSrcUrls],
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'unpkg.com'],
-      styleSrc: ["'self'", 'cdnjs.cloudflare.com'],
-      // fontSrc: ["'self'", "maxcdn.bootstrapcdn.com"],
+      frameSrc: ["'self'", 'https://*.stripe.com'],
     },
   })
 );
@@ -85,6 +140,7 @@ app.use('/api', limiter);
 
 // body parser, reading data from body to req.body
 app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // Data sanitaization against NoSQL query injection
