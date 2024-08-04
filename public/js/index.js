@@ -30,10 +30,16 @@ if (loginForm) {
 if (userUpdateData) {
   userUpdateData.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
+    const form = new FormData();
+    // we re created thim from because its now a multi form data, the data + the image
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('photo', document.getElementById('photo').file);
 
-    updateSettings({ name, email }, 'data');
+    // const name = document.getElementById('name').value;
+    // const email = document.getElementById('email').value;
+
+    updateSettings(form, 'data');
   });
 }
 

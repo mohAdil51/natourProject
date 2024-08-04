@@ -16,7 +16,11 @@ router.use(authController.protect);
 
 router.route('/me').get(userController.getMe, userController.getUserById);
 router.route('/updatemypassword').patch(authController.updatePassword);
-router.route('/updateMe').patch(userController.updateMe);
+router.route('/updateMe').patch(
+  userController.uploadUserPhoto,
+  // userController.resizeUserPhoto,
+  userController.updateMe
+);
 router.route('/deleteMe').delete(userController.deleteMe);
 
 // only admins are allowed to perform actions after this middleware
